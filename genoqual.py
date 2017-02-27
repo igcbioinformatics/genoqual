@@ -242,10 +242,8 @@ class DataWrapper(object):
 
 		for entry in self.config.config:
 			prefix = entry["prefix"]
-			log.info(prefix)
 			files = self._get_files(prefix)
-			log.info("Files for prefix %s"%prefix)
-			log.info(files)
+			log.debug("Files for prefix %s"%prefix)
 			entry["original_files"] = files
 
 			# Check that we have paired reads
@@ -739,7 +737,6 @@ class DataFormatter(object):
 		))
 
 		i = datetime.datetime.now()
-		log.info('VALUES {0}'.format(values))
 		with open(filename, 'w') as fh:
 			fh.write("<!DOCTYPE html>\n")
 			fh.write("<html>\n<head>\n<title>{0}</title>\n".format(title))
@@ -769,7 +766,6 @@ class DataFormatter(object):
 			fh.write("<div class='table-responsive'>\n")
 			fh.write("<table class='table table-striped'>\n")			
 			for i, line in enumerate(values):
-				log.info(line)
 				if i == 0:
 					fh.write("<tr class='header' style='background-color:#006d7a;color: white;'>") 
 				elif i == len(values)-1:
@@ -779,13 +775,11 @@ class DataFormatter(object):
 
 					if '_L001_R1_' in line[1]: # Before L001_R1 of a sample, we write the summary line for all the sample's lanes
 						sample=line[0].split('_')[0]
-						log.info("\n\nSAMPLE DICT {0}".format(self.stats_all_lanes[sample]))
 						fh.write("<tr class='header expand' {0}>".format(row_color.next()))
 						fh.write("<td><span style='vertical-align:middle'>{0} </span><span class=\"sign\"></td>".format(sample))
 						fh.write("<td></td>") # empty field for filename
 						self.stats_all_lanes[sample]['percent_q30'] = round(100*float(self.stats_all_lanes[sample]['q30'])/self.stats_all_lanes[sample]['total_bases'],2)
 						for e in self.stats_all_lanes[sample]:
-							log.info(self.stats_all_lanes[sample][e])
 							try:
 								value = int(self.stats_all_lanes[sample][e])
 							except ValueError:
@@ -1073,19 +1067,19 @@ class Qiime(BaseTool):
 					if file.endswith("R1_001.fastq"):
 						self.infile = self.inputdir+'/'+os.path.basename(file+".extendedFrags.fastq")
 						self.infile_fwd = file
-						log.info("Original R1 file should be:")
-						log.info(self.infile_fwd)						
-						log.info("merged file should be:")
-						log.info(self.infile)
+						log.debug("Original R1 file should be:")
+						log.debug(self.infile_fwd)						
+						log.debug("Merged file should be:")
+						log.debug(self.infile)
 					elif file.endswith("I1_001.fastq"):
 						self.original_index = file
 						self.indexfile = self.inputdir+'/'+os.path.basename(file.replace(".fastq","_fixed.fastq"))
-						log.info("index file should be:")
-						log.info(self.indexfile)
+						log.debug("Index file should be:")
+						log.debug(self.indexfile)
 					elif file.endswith("R2_001.fastq"):						
 						self.infile_rev = file
-						log.info("Original R2 file should be:")
-						log.info(self.infile_rev)						
+						log.debug("Original R2 file should be:")
+						log.debug(self.infile_rev)						
 						
 		if not os.path.isfile(self.datacfg.config.params["metadata"]):
 			raise Error("Metadata file not found at '{0}'"
@@ -1117,10 +1111,10 @@ class Qiime(BaseTool):
 			self.fix_header_pairs()
 
 		if self.indexfile!=None and self.infile!=None and self.metafile!=None:
-			log.info(self.indexfile)
-			log.info(self.infile)
-			log.info(self.metafile)
-			log.info("Checking metafile for whitespaces...")
+			log.debug(self.indexfile)
+			log.debug(self.infile)
+			log.debug(self.metafile)
+			log.debug("Checking metafile for whitespaces...")
 			self.metafile_correct(self.metafile)
 			
 			#Splitting libraries...
@@ -1389,7 +1383,6 @@ class QiimeOnControls(Qiime):
 				metaruns.append(item)
 		metaruns += [self.current_run]
 		for item in metaruns:
-			log.info(self.input_path+item+'/metadata.csv')
 			metain = open(self.input_path+item+'/metadata.csv').readlines()
 			
 			for line in metain:
@@ -1433,16 +1426,12 @@ class QiimeOnControls(Qiime):
 			log.info("Stdout:\n{0}\n Stderr:\n{1}\n".format(out, err))
 		
 		counts=open(self.destdir+"/Controls_analysis/counts.txt").readlines()
-		log.info('Opened counts')
-		log.info(self.current_run)
 		current_run_counts=[]
 		for line in counts:
 			if line.startswith('GEU') and line.split()[0].split('.')[-1].strip(':') == self.current_run.split('_')[1]:
 				c = int(float(line.split()[-1]))
 				current_run_counts.append(c)
-		log.info(current_run_counts)
 		min_count=min(current_run_counts)
-		log.info(min_count)
 		
 		try:
 			out,err = self.beta_diversity(self.destdir+"/Controls_analysis/otus/otu_table_mc2_w_tax_no_pynast_failures.biom",
@@ -1723,7 +1712,6 @@ class CoverageAndQuality(BaseTool):
 	def prepare(self):
 		self.nextseq = self.datacfg.config.params['nextseq']		
 		log.info("Performing pre-flight checks on Bwa aligner")
-		log.debug("NEXTSEQ:{0}".format(self.nextseq))
 		cmd = ("bwa")
 		p = Process(cmd)
 		out, err = p.run(trust_exitcode=False)

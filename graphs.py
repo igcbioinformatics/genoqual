@@ -93,6 +93,7 @@ if __name__ == '__main__':
 		#Flagging the run as meta if it's the case
 		if df_R1_selection['meta'].iloc[0]:
 			meta_run=True
+			print 'Meta!'
 		if df_R1_selection['nextseq'].iloc[0]:
 			nextseq_run=True	
 			print 'Nextseq!'
@@ -155,15 +156,11 @@ if __name__ == '__main__':
 		fig, ax = plt.subplots()	
 		df_R1_others = df_R1_others[df.nextseq==nextseq_run]
 		df_R1_others_grouped=df_R1_others.groupby(['timestamp', 'length'], as_index=False).sum()	
-		print df_R1_others_grouped
 		if df_selection.empty!=True:
 			df_R1_selection_grouped=df_R1_selection.groupby(['timestamp', 'length'], as_index=False).sum()
 			possible_lengths=sorted(df.length.unique())
-			print df_R1_selection_grouped
-			print possible_lengths
 			for c in range(1,len(possible_lengths)+1): #adding fake rows for all possible lengths, so that the selection graph has the same categories as the 'others' graph overlayed on it
 				df_R1_selection_grouped.loc[c]=[0,possible_lengths[c-1],0,0,0,0,0,0,900000000,0,0]	
-			print df_R1_selection_grouped
 			stripplot_sel=seaborn.stripplot(x='length',y='TotReads', marker='*', size=16, color='red', data=df_R1_selection_grouped, jitter=False, ax=ax)
 			stripplot_sel.legend(loc='lower left', title='Length')
 		boxplot=seaborn.boxplot(x="length", y="TotReads", data=df_R1_others_grouped)
