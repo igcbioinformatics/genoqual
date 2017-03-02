@@ -485,11 +485,21 @@ class DataCollector(object):
 					total_mapped_bases = cov["total_mapped_bases"]
 					self.stats_all_lanes[sample_id]['mapped_bases'] = total_mapped_bases
 					mean_coverage = cov["mean_coverage"]
-					self.stats_all_lanes[sample_id]['mean_cov'] = "{0:.2f}".format(float(mean_coverage))
-					theoretical_cov_Q20 = "{0:.2f}".format(quality[20]/cov["ref_length"])
+					try:
+						self.stats_all_lanes[sample_id]['mean_cov'] = "{0:.2f}".format(float(mean_coverage))
+					except ValueError:
+						self.stats_all_lanes[sample_id]['mean_cov'] = mean_coverage
+					try:
+						theoretical_cov_Q20 = "{0:.2f}".format(quality[20]/cov["ref_length"])
+					except ValueError:
+						theoretical_cov_Q20 = 'ERROR'	
 					self.stats_all_lanes[sample_id]['cov_q20'] = theoretical_cov_Q20
-					theoretical_cov_Q30 = "{0:.2f}".format(quality[30]/cov["ref_length"])
-					self.stats_all_lanes[sample_id]['cov_q30'] = theoretical_cov_Q30					
+					try:
+						theoretical_cov_Q30 = "{0:.2f}".format(quality[30]/cov["ref_length"])
+					except ValueError:
+						theoretical_cov_Q30 = 'ERROR'	
+					self.stats_all_lanes[sample_id]['cov_q30'] = theoretical_cov_Q30
+					
 					total_mapped_reads = cov["total_mapped_reads"]
 					self.stats_all_lanes[sample_id]['mapped_reads'] = total_mapped_reads					
 					total_reads_used = cov["total_reads_used"]
