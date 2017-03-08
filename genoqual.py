@@ -313,14 +313,15 @@ class DataWrapper(object):
 
 				if ext in [".gz", ".gzip"]:
 					log.info("Decompressing '%s' into temporary folder", fname)
-					with gzip.open(file) as infile:
-						with open(out, 'w') as outfile:
-							while True:
-								# Read/Write 1 MB at a time
-								data = infile.read(1024 ** 2)
-								if not data:
-									break
-								outfile.write(data)
+					os.popen('zcat {0} > {1}'.format(file, out))
+					#with gzip.open(file) as infile:
+						#with open(out, 'w') as outfile:
+							#while True:
+								## Read/Write 1 MB at a time
+								#data = infile.read(1024 ** 2)
+								#if not data:
+									#break
+								#outfile.write(data)
 				else:
 					log.info("Copying '%s' to temporary folder", fname)
 					# This should only be fastq files
@@ -1864,22 +1865,24 @@ class CoverageAndQuality(BaseTool):
 
 				log.info("Converting formats SAM -> BAM and sorting")
 				log.debug("SAM: '%s' -> BAM '%s'", sam, bam)
-
-				cmd1 = ("samtools", "view", "-Sb", sam)
-				cmd2 = ("samtools", "sort", "-", os.path.splitext(bam)[0])
-				p1 = Process(cmd1)
-				p1.run(piped=True)
-				p2 = Process(cmd2)
-				p2.run(stdin=p1.p.stdout)
+				os.popen("samtools view -@ {2} -Sb {0} > {1}".format(sam, bam.replace('.bam', '_unsorted.bam'), self.datacfg.config.params["args"].threads))
+				os.popen("samtools sort -@ {2} -o {1} {0} ".format(bam.replace('.bam', '_unsorted.bam'), bam, self.datacfg.config.params["args"].threads))
+				#cmd1 = ("samtools", "view", "-Sb", sam)
+				#cmd2 = ("samtools", "sort", "-", os.path.splitext(bam)[0])
+				#p1 = Process(cmd1)
+				#p1.run()
+				#p2 = Process(cmd2)
+				#p2.run(stdin=p1.p.stdout)
 				
 
 				# Avoid zombies on the first process
-				p1.finish()
+				#p1.finish()
 
 				log.debug("Removing SAM file")
 
 				# Remove SAM file to reduce space
 				os.remove(sam)
+				os.remove(bam.replace('.bam', '_unsorted.bam'))
 
 				log.info("Indexing BAM file")
 				log.debug("Indexed file: '%s'", bam)

@@ -106,6 +106,8 @@ if __name__ == '__main__':
 			label.set_rotation(45)
 		stripplotR1.legend(loc='lower left', title='Length')
 		stripplotR1.set_title('Per Sample %Q30 bases for R1\n', fontsize=16, fontweight='bold')
+		stripplotR1.set_xlabel('\nDate', fontsize=12)
+		stripplotR1.set_ylabel('%Q30\n', fontsize=12)		
 		plt.tight_layout()				
 		plt.savefig('%s/fig1.png'%output)
 		#seaborn.plt.show()
@@ -123,6 +125,8 @@ if __name__ == '__main__':
 			label.set_rotation(45)
 		stripplotR2.legend(loc='lower left', title='Length')
 		stripplotR2.set_title('Per Sample %Q30 Bases for R2\n', fontsize=16, fontweight='bold')
+		stripplotR2.set_xlabel('\nDate', fontsize=12)
+		stripplotR2.set_ylabel('%Q30\n', fontsize=12)		
 		plt.tight_layout()				
 		plt.savefig('%s/fig2.png'%output)
 		#seaborn.plt.show()
@@ -133,20 +137,25 @@ if __name__ == '__main__':
 		df=df.sort_values(['Direction', 'length'],)
 		df_selection=df[df.Id==myrun]
 		df_others=df[(df.Id!=myrun) & (df.nextseq==nextseq_run)]
-		if nextseq_run:
-			boxplot=seaborn.boxplot(x="Lane", y="Q30_Percent", hue="length", data=df_others)			
-		else:
-			boxplot=seaborn.boxplot(x="Direction", y="Q30_Percent", hue="length", data=df_others)
-		seaborn.despine(offset=20, trim=True)
-		#boxplot.set(ylim=(0, 100))
-		boxplot.legend(loc='lower left', title='Length')
+		if not df_others.empty:
+			if nextseq_run:
+				boxplot=seaborn.boxplot(x="Lane", y="Q30_Percent", hue="length", data=df_others)			
+			else:
+				boxplot=seaborn.boxplot(x="Direction", y="Q30_Percent", hue="length", data=df_others)
+			seaborn.despine(offset=20, trim=True)
+			boxplot.legend(loc='lower left', title='Length')
+			boxplot.set_title('Per Sample %Q30 Bases\n', fontsize=16, fontweight='bold')		
+			
+			
 		if df_selection.empty!=True:
 			if nextseq_run:
 				stripplot_sel=seaborn.stripplot(x='Lane',y='Q30_Percent', marker='*', size=10, color='red', data=df_selection, jitter=False)				
 			else:
 				stripplot_sel=seaborn.stripplot(x='Direction',y='Q30_Percent', marker='*', size=10, color='red', data=df_selection, jitter=False)
-			stripplot_sel.legend(loc='lower left', title='Length')	
-		boxplot.set_title('Per Sample %Q30 Bases\n', fontsize=16, fontweight='bold')		
+			stripplot_sel.legend(loc='lower left', title='Length')
+			stripplot_sel.set_xlabel('\nLane', fontsize=12)
+			stripplot_sel.set_ylabel('%Q30\n', fontsize=12)				
+		
 		plt.tight_layout()				
 		plt.savefig('%s/fig3.png'%output)		
 		#seaborn.plt.show()
@@ -163,15 +172,24 @@ if __name__ == '__main__':
 				df_R1_selection_grouped.loc[c]=[0,possible_lengths[c-1],0,0,0,0,0,0,900000000,0,0]	
 			stripplot_sel=seaborn.stripplot(x='length',y='TotReads', marker='*', size=16, color='red', data=df_R1_selection_grouped, jitter=False, ax=ax)
 			stripplot_sel.legend(loc='lower left', title='Length')
-		boxplot=seaborn.boxplot(x="length", y="TotReads", data=df_R1_others_grouped)
-		seaborn.despine(offset=20)			
-		if nextseq_run:
-			boxplot.set(ylim=(0, 400000000))	
-		else:
-			boxplot.set(ylim=(0, 30000000))			
-		boxplot.set_title('Total Reads per Run\n', fontsize=16, fontweight='bold')
-		boxplot.yaxis.set_major_formatter(ticker.FuncFormatter(millions))	
-		boxplot.legend(loc='upper right', title='Length')
+			stripplot_sel.set_title('Total Reads per Run\n', fontsize=16, fontweight='bold')
+			stripplot_sel.yaxis.set_major_formatter(ticker.FuncFormatter(millions))	
+			stripplot_sel.legend(loc='upper right', title='Length')		
+			stripplot_sel.set_xlabel('\nTotal Reads', fontsize=12)
+			stripplot_sel.set_ylabel('Length\n', fontsize=12)			
+			if nextseq_run:
+				stripplot_sel.set(ylim=(0, 400000000))	
+			else:
+				stripplot_sel.set(ylim=(0, 30000000))			
+	
+		if not df_R1_others_grouped.empty:
+			boxplot=seaborn.boxplot(x="length", y="TotReads", data=df_R1_others_grouped)
+			seaborn.despine(offset=20)			
+			#if nextseq_run:
+				#boxplot.set(ylim=(0, 400000000))	
+			#else:
+				#boxplot.set(ylim=(0, 30000000))			
+
 			
 		plt.tight_layout()				
 		plt.savefig('%s/fig4.png'%output)			
@@ -206,7 +224,7 @@ if __name__ == '__main__':
 		
 		pointplot_bycolor.set_title('Total Reads per Run\n', fontsize=16, fontweight='bold')		
 		pointplot_bycolor.set_xlabel('\nDate', fontsize=12)
-		pointplot_bycolor.set_ylabel('\nReads', fontsize=12)
+		pointplot_bycolor.set_ylabel('\nReads\n', fontsize=12)
 		
 		pointplot_bycolor.yaxis.set_major_formatter(ticker.FuncFormatter(millions))
 		
@@ -258,7 +276,7 @@ if __name__ == '__main__':
 			plt.legend(handles=handles+[plt.Line2D((0,1),(0,0), color='skyblue', marker='o', label='Assigned')])
 			
 			pointplot_bycolor.set_xlabel('\nDate', fontsize=12)
-			pointplot_bycolor.set_ylabel('\nReads', fontsize=12)
+			pointplot_bycolor.set_ylabel('Reads\n', fontsize=12)
 			plt.setp(pointplot_bycolor.collections, zorder=100)		
 			plt.setp(star, zorder=101)
 			
@@ -294,7 +312,7 @@ if __name__ == '__main__':
 			g.set(ylim=(0,1000000))	
 			g.set_title('Total Reads assigned to controls (16s)\n', fontsize=18, fontweight='bold')		
 			g.set_xlabel('\nDate', fontsize=12)
-			g.set_ylabel('\nReads', fontsize=12)			
+			g.set_ylabel('Reads\n', fontsize=12)			
 			fig.savefig('%s/fig6meta.png'%output, figsize=(25,9))						
 			plt.tight_layout()
 
@@ -304,7 +322,7 @@ if __name__ == '__main__':
 			df_current_grouped=df_current.groupby(['User'], as_index=False).sum()
 			barplot=seaborn.barplot(x="User", y="TotReads_assigned", data=df_current_grouped)
 			#barplot.yaxis.set_major_formatter(ticker.FuncFormatter(millions))
-			barplot.set_ylabel('\nReads', fontsize=12)
+			barplot.set_ylabel('Reads\n', fontsize=12)
 			barplot.set_title('Total Reads assigned to each user (16s)\n', fontsize=14, fontweight='bold')					
 			fig.savefig('%s/fig7meta.png'%output)
 			
