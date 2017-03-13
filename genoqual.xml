@@ -4,7 +4,7 @@
         <requirement type="package" version="2.2.31">blast</requirement>
         <requirement type="package" version="r75">seqtk</requirement>
         <requirement type="package" version="0.11.4">FastQC</requirement>
-        <requirement type="package" version="0.1.19">samtools</requirement>
+        <requirement type="package" version="1.3.1">samtools</requirement>
         <requirement type="package" version="0.7.12">bwa</requirement>
         <requirement type="package" version="0.6.1">htseq</requirement>
         <requirement type="package" version="1.11.2">numpy</requirement>

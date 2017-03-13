@@ -852,9 +852,10 @@ class DataFormatter(object):
 					fh.write('<td><img src="data:image/png;base64,%s" class="img-rounded" width="80%%"></td>\n'%encoded_figs[img])
 					
 					if c==7:
+						fh.write("<tr class='header'>")
 						fh.write('<td><p style="font-size:18px; font-weight:bold;padding-top: 5px;margin-bottom: 15px;">Historical unweighted unifrac PCoA plot for controls</p>\n'
 							 '<iframe src="%s/Qiime/Controls_analysis/bdiv/unweighted_unifrac_emperor_pcoa_plot/index.html" style="margin:0;width:100%%;height:450px">'
-							 'Alternative text for browsers that do not understand IFrames.</iframe></td>'%os.path.dirname(filename))			
+							 'Alternative text for browsers that do not understand IFrames.</iframe></td></tr>'%os.path.dirname(filename))			
 				if c>=4 and c<7:
 					fh.write("<tr class='header'>\n<td colspan=2>\n")					
 					fh.write('<p style="text-align:center;"><img src="data:image/png;base64,%s" class="img-rounded" width="95%%"></p>\n'%encoded_figs[img])
@@ -1097,7 +1098,16 @@ class Qiime(BaseTool):
 			            .format(self.datacfg.config.params["metadata"]))
 		else:
 			self.metafile = self.datacfg.config.params["metadata"]
-
+		
+		out, err = self.check_metafile(self.metafile, os.path.join(self.datacfg.dir, "validate_metadata"))
+		if err or not out.startswith("No errors"):
+			log.error("Error while validating metadata file.")
+			log_metadata = open(glob(self.datacfg.dir+"/validate_metadata/*.log")[0]).read()
+			log.error(log_metadata)
+			sys.exit(1)
+		else:
+			log.info("Metadata file validated")
+			shutil.rmtree(self.datacfg.dir+"/validate_metadata/")
 		log.info("Qiime pre-flight checks finished successfully")
 
 
@@ -1248,6 +1258,16 @@ class Qiime(BaseTool):
 		        "-i", i,		        
                         "-o", o,
                         "-p", paramfile]	
+		p = Process(cmd)
+		out, err = p.run()	
+		return out, err	
+
+	def check_metafile(self, i, outdir):
+		log.info('Checking metafile...')
+		cmd = [
+		        "validate_mapping_file.py",
+		        "-m", i,		        
+		        "-o", outdir]	
 		p = Process(cmd)
 		out, err = p.run()	
 		return out, err	

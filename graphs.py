@@ -178,7 +178,7 @@ if __name__ == '__main__':
 			stripplot_sel.set_xlabel('\nTotal Reads', fontsize=12)
 			stripplot_sel.set_ylabel('Length\n', fontsize=12)			
 			if nextseq_run:
-				stripplot_sel.set(ylim=(0, 400000000))	
+				stripplot_sel.set(ylim=(0, 600000000))	
 			else:
 				stripplot_sel.set(ylim=(0, 30000000))			
 	
