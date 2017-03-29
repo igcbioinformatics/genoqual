@@ -4,7 +4,7 @@ import os
 import sys
 import commands
 import getopt
-import time
+import time as timelibrary
 import datetime
 import sqlite3 as lite
 import glob
@@ -74,11 +74,13 @@ if __name__ == '__main__':
 				if length==301: length=300
 				if length==251: length=250
 				if length==151: length=150				
-				run_date=time.ctime(os.path.getmtime(report_path))
+				run_date=timelibrary.ctime(os.path.getmtime(report_path))
 				month=month_converter(run_date.split()[1])
 				year=run_date.split()[4]
 				day=run_date.split()[2]
-				timestamp=int(time.mktime(datetime.datetime.strptime('%s/%s/%s'%(day,month,year), "%d/%m/%Y").timetuple()))
+				time=run_date.split()[3]
+				datestring='%s-%s-%s %s'%(year,month,day,time)
+				timestamp=int(timelibrary.mktime(datetime.datetime.strptime(datestring, "%Y-%m-%d %H:%M:%S").timetuple()))
 				cur.execute("INSERT OR IGNORE INTO Runs VALUES('%s', %s, %s, %s, %s, %s, %s, %s)"%(run_n, day, month, year, timestamp, length, str(meta), str(nextseq)))
 				oldreport=0
 				stored_samplename=''
@@ -132,7 +134,7 @@ if __name__ == '__main__':
 					cur.execute("INSERT OR IGNORE INTO Samples VALUES('%s','%s','%s','%s', %s, %s, %s, %s)"%(run_n, samplename, direction, lane, Q30_percent, totreads, totbases_all, totbases_Q30))
 				
 				if meta == 1:
-					users=[item for item in os.listdir(basepath+'/results/%s/Qiime'%f) if item not in ['params.txt', 'temp_slout', 'temp_slout_unfiltered']]
+					users=[item for item in os.listdir(basepath+'/results/%s/Qiime'%f) if item not in ['params.txt', 'temp_slout', 'temp_slout_unfiltered', 'demultiplex_log.txt']]
 					for u in users:
 						if u == 'Controls_analysis':
 							continue

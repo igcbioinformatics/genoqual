@@ -321,7 +321,7 @@ if __name__ == '__main__':
 			df_current=df_meta[df_meta.Id==myrun]
 			df_current_grouped=df_current.groupby(['User'], as_index=False).sum()
 			barplot=seaborn.barplot(x="User", y="TotReads_assigned", data=df_current_grouped)
-			#barplot.yaxis.set_major_formatter(ticker.FuncFormatter(millions))
+			barplot.yaxis.set_major_formatter(ticker.FuncFormatter(millions))
 			barplot.set_ylabel('Reads\n', fontsize=12)
 			barplot.set_title('Total Reads assigned to each user (16s)\n', fontsize=14, fontweight='bold')					
 			fig.savefig('%s/fig7meta.png'%output)

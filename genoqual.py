@@ -1225,6 +1225,7 @@ class Qiime(BaseTool):
 			log.info('Splitting fastq files for users...')			
 			self.split_fastq()
 			shutil.rmtree(self.destdir+"/temp_slout")
+			shutil.copy(self.destdir+"/temp_slout_unfiltered/split_library_log.txt", self.destdir+"/demultiplex_log.txt")			
 			shutil.rmtree(self.destdir+"/temp_slout_unfiltered")
 
 		else:
@@ -2510,7 +2511,7 @@ def parse_args():
 	parser.add_argument('--blastdb',
 	                    help="Location of blast databases (to be set as the "
 	                    "env variable BLASTDB",
-	                    default="/usr/local/bin/ncbi-blast-2.5.0+/db") # Mauro correggi qui
+	                    default="/home/opt/blast/ncbi-blast-2.4.0+/db") # Mauro correggi qui
 	parser.add_argument('--url', '-u',
 	                    help="Url to use in HTML output",
 	                    default="minsk.igc.gulbenkian.pt:8080/static/genoqual_results/") # QUI
