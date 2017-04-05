@@ -243,7 +243,6 @@ class DataWrapper(object):
 		for entry in self.config.config:
 			prefix = entry["prefix"]
 			files = self._get_files(prefix)
-			log.debug("Files for prefix %s"%prefix)
 			entry["original_files"] = files
 
 			# Check that we have paired reads
@@ -390,8 +389,6 @@ class DataCollector(object):
 		sum_mapped_bases = 0
 		sum_mapped_reads = 0
 		sum_total_reads_used = 0
-		theoretical_cov_Q20_sum = 0
-		theoretical_cov_Q30_sum = 0
 		multiqc_file = self.pipe.data.config.params["output_url"]+'/multiqc_report.html'
 
 
@@ -482,7 +479,6 @@ class DataCollector(object):
 
 				if ref and filename in self.pipe.cov.data:
 					cov = self.pipe.cov.data[filename]
-
 					total_mapped_bases = cov["total_mapped_bases"]
 					self.stats_all_lanes[sample_id]['mapped_bases'] = total_mapped_bases
 					mean_coverage = cov["mean_coverage"]
@@ -493,13 +489,12 @@ class DataCollector(object):
 					try:
 						theoretical_cov_Q20 = "{0:.2f}".format(quality[20]/cov["ref_length"])
 					except ValueError:
-						theoretical_cov_Q20 = 'ERROR'	
-					self.stats_all_lanes[sample_id]['cov_q20'] = theoretical_cov_Q20
+						theoretical_cov_Q20 = 'ERROR'
+
 					try:
 						theoretical_cov_Q30 = "{0:.2f}".format(quality[30]/cov["ref_length"])
 					except ValueError:
 						theoretical_cov_Q30 = 'ERROR'	
-					self.stats_all_lanes[sample_id]['cov_q30'] = theoretical_cov_Q30
 					
 					total_mapped_reads = cov["total_mapped_reads"]
 					self.stats_all_lanes[sample_id]['mapped_reads'] = total_mapped_reads					
@@ -508,9 +503,6 @@ class DataCollector(object):
 					qualimap_file = cov["qualimap"]
 					self.stats_all_lanes[sample_id]['qualimap'] = qualimap_file #get it as it is (tmp path)
 
-
-					theoretical_cov_Q20_sum+=float(theoretical_cov_Q20)
-					theoretical_cov_Q30_sum+=float(theoretical_cov_Q30)
 
 					if not qualimap_file in ("=", "ERROR"):
 						sum_mapped_bases+=int(total_mapped_bases)
@@ -631,6 +623,9 @@ class DataCollector(object):
 
 
 
+			self.stats_all_lanes[sample_id]['cov_q20'] = "{0:.2f}".format(float(self.stats_all_lanes[sample_id]['q20'])/float(cov["ref_length"]))
+			self.stats_all_lanes[sample_id]['cov_q30'] = "{0:.2f}".format(float(self.stats_all_lanes[sample_id]['q30'])/float(cov["ref_length"]))
+			
 		self.output.append(['Total',
 		                          '',
 		                          str(sum_q20),
