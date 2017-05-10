@@ -21,7 +21,7 @@ def print_help():
 
 if __name__ == '__main__':
 	
-	basepath_save=sys.argv[1] # Mauro: Temporary fix to test it, reads the official one but writes on my desktop
+	basepath_save=sys.argv[1]
 	basepath='/afs/igc.gulbenkian.pt/folders/gen-com/USERS/UBI/'
 	print 'Basepath:', basepath
 	print 'Basepath save', basepath_save
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	con = None
 
 	try:
-		con = lite.connect('%s/runs_samples.db'%basepath_save) # Mauro: The temporary fix affects this too.
+		con = lite.connect('%s/runs_samples.db'%basepath_save)
 
 		cur = con.cursor()    
 		cur.execute('SELECT SQLITE_VERSION()')
@@ -61,9 +61,8 @@ if __name__ == '__main__':
 				
 				if os.path.exists(basepath+'/results/%s/Qiime'%f):
 					meta=1
-				if os.path.exists(basepath+'/results/%s/Merged_lanes'%f):
+				if glob.glob(basepath+'/results/%s/FastQC/*_L004_R1_001*'%f)!=[]:	#Using FasdtQC output to spot multiple lanes
 					nextseq=1		
-	
 				reads_descr=commands.getoutput("grep -a2 '\[Reads\]' %s/input/%s/SampleSheet.csv | tail -n2"%(basepath,f)).split()
 				if len(reads_descr)==2:
 					paired=1

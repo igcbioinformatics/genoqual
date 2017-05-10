@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import matplotlib
+matplotlib.use('Agg')
 import os
 import sys
 import commands
@@ -8,6 +10,8 @@ import re
 import sqlite3 as lite
 import seaborn
 import pandas
+import matplotlib.pyplot as plt
+plt.ioff()
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
 import numpy as np
@@ -180,7 +184,7 @@ if __name__ == '__main__':
 			if nextseq_run:
 				stripplot_sel.set(ylim=(0, 600000000))	
 			else:
-				stripplot_sel.set(ylim=(0, 30000000))			
+				stripplot_sel.set(ylim=(0, 40000000))			
 	
 		if not df_R1_others_grouped.empty:
 			boxplot=seaborn.boxplot(x="length", y="TotReads", data=df_R1_others_grouped)

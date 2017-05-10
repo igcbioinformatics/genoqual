@@ -447,9 +447,10 @@ class DataCollector(object):
 				
 				# jcostaDamage
 				if filename in self.pipe.tax.data:
+					
 					try:
 						cont_file, primary_org = self.pipe.tax.data[filename]
-					except KeyError:
+					except (KeyError, TypeError):
 						log.debug("Filename '%s' has no contaminants "
 						          "information, ignoring.", filename)
 						contaminants_file = primary_org = ""
@@ -620,11 +621,9 @@ class DataCollector(object):
 				        merged_reads_failed,
 				])
 
-
-
-
-			self.stats_all_lanes[sample_id]['cov_q20'] = "{0:.2f}".format(float(self.stats_all_lanes[sample_id]['q20'])/float(cov["ref_length"]))
-			self.stats_all_lanes[sample_id]['cov_q30'] = "{0:.2f}".format(float(self.stats_all_lanes[sample_id]['q30'])/float(cov["ref_length"]))
+			if qualimap_file != "":
+				self.stats_all_lanes[sample_id]['cov_q20'] = "{0:.2f}".format(float(self.stats_all_lanes[sample_id]['q20'])/float(cov["ref_length"]))
+				self.stats_all_lanes[sample_id]['cov_q30'] = "{0:.2f}".format(float(self.stats_all_lanes[sample_id]['q30'])/float(cov["ref_length"]))
 			
 		self.output.append(['Total',
 		                          '',
@@ -842,15 +841,14 @@ class DataFormatter(object):
 			fh.write("<tr class='header'>")
 			for c,img in enumerate(encoded_figs.keys()):
 				if c<4 or c==7:
-					if c%2==0 and c!=0:
+					if (c%2==0 and c!=0) or c==7:
 						fh.write("</tr>\n<tr class='header'>")
 					fh.write('<td><img src="data:image/png;base64,%s" class="img-rounded" width="80%%"></td>\n'%encoded_figs[img])
 					
 					if c==7:
-						fh.write("<tr class='header'>")
 						fh.write('<td><p style="font-size:18px; font-weight:bold;padding-top: 5px;margin-bottom: 15px;">Historical unweighted unifrac PCoA plot for controls</p>\n'
 							 '<iframe src="%s/Qiime/Controls_analysis/bdiv/unweighted_unifrac_emperor_pcoa_plot/index.html" style="margin:0;width:100%%;height:450px">'
-							 'Alternative text for browsers that do not understand IFrames.</iframe></td></tr>'%os.path.dirname(filename))			
+							 'Alternative text for browsers that do not understand IFrames.</iframe></td></tr>'%self.config["output_url"])			
 				if c>=4 and c<7:
 					fh.write("<tr class='header'>\n<td colspan=2>\n")					
 					fh.write('<p style="text-align:center;"><img src="data:image/png;base64,%s" class="img-rounded" width="95%%"></p>\n'%encoded_figs[img])
@@ -997,7 +995,7 @@ class MultiQC(BaseTool):
 		p = Process(cmd)
 		out, err = p.run()
 
-		if err or not out.startswith("multiqc, version"):
+		if err and not out.startswith("multiqc, version"):
 			raise IOError("Unexpected output from MultiQC wrapper.\n"
 			              "Stdout:\n{0}\n Stderr:\n{1}\n"
 			              .format(out, err))
@@ -2438,7 +2436,11 @@ class Pipeline(object):
 		log.debug("Removing .fastq files used in the analysis")
 		for file in glob(os.path.join(self.data.dir, "*.fastq")):
 			os.remove(file)
-
+		
+		if self.config.params["nextseq"] == True:
+			log.debug("Removing .fastq files for NextSeq merged lanes")			
+			shutil.rmtree(os.path.join(self.data.dir, "Merged_lanes"))
+			
 		log.debug("Preparing data for reporting")
 		data = DataCollector(self)
 
@@ -2494,7 +2496,6 @@ def parse_args():
 	                    "located. E.g. 16 if folder name is Run_16")
 	parser.add_argument('--base_path',
 	                    help="Location of input/reference/results folders",
-	                    #default="/home/mtruglio/Desktop/Test_UBI_folder/") #Mauro: correggi qui
 	                    default="/afs/igc.gulbenkian.pt/folders/gen-com/USERS/UBI/")
 	                    
 	parser.add_argument('--output', '-o',
@@ -2506,14 +2507,14 @@ def parse_args():
 	parser.add_argument('--blastdb',
 	                    help="Location of blast databases (to be set as the "
 	                    "env variable BLASTDB",
-	                    default="/home/opt/blast/ncbi-blast-2.4.0+/db") # Mauro correggi qui
+	                    default="/home/galaxy/blast/ncbi-blast-2.4.0+/db")
 	parser.add_argument('--url', '-u',
 	                    help="Url to use in HTML output",
-	                    default="minsk.igc.gulbenkian.pt:8080/static/genoqual_results/") # QUI
+	                    default="geu-galaxy.igc.gulbenkian.pt/static/genoqual_results/") 
 	parser.add_argument('--threads', '-t',
 	                    help="Number of threads to use in subprocesses",
-	                    default='10')
-						#default=os.environ.get("GALAXY_SLOTS", "8"))
+	                    default=os.environ.get("GALAXY_SLOTS", "8"))
+
 	parser.add_argument('--verbose', '-v', action="count",
 	                    help="Verbosity level. -vvv is the highest level")
 	return parser.parse_args()
